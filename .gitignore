@@ -1,0 +1,17 @@
+# Ignorar carpetas completas
+files/lineas/
+files/indicadores/
+
+# (Opcional) ignorar TODO dentro de files y luego permitir excepciones
+# files/*
+# !files/.gitkeep
+
+# Ignorar PDFs específicos en files/ (por nombre)
+files/Manual de usuario*.pdf
+files/Manual_de_usuario*.pdf
+files/PIPEA*.pdf
+
+# Si también quieres ignorar evidencias por patrón (por si se van a otras carpetas)
+**/f_*_evidencia_*
+
+files/lineas/**/*.png

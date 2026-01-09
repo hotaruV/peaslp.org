@@ -1,0 +1,53 @@
+.slider_widget {
+	position: relative;
+	text-align: left;
+	overflow:hidden;
+}
+.slider_widget .cabecera{
+	position: relative;
+	line-height:40px;
+	text-align:left;
+}
+.slider_widget .cabecera h1, .slider_widget .cabecera h2, .slider_widget .cabecera h3{
+	line-height:40px;
+	text-align:left;
+}
+.slider_widget .cabecera .flechas{
+	position:absolute;
+	width:90px;
+	height:40px;
+	right:0;
+	top:0;
+}
+
+.slider_widget .videos_slider_marco{
+	overflow:hidden;	
+}
+.slider_widget .flecha {
+	position: absolute;
+	top:50%;
+	margin-top:-20px;
+	height: 40px;
+	width: 40px;
+	cursor: pointer;
+	z-index: 2;
+	background: no-repeat center;
+}
+.slider_widget  .flecha.izq{
+	background-image: url(../img/sitio/flecha_izq.png);
+	left:0;
+}
+.slider_widget .flecha.der {
+	background-image: url(../img/sitio/flecha_der.png);
+	right:0;	
+}
+.slider_widget .slider_widget_items {
+	
+}
+.slider_widget .slider_widget_items .slider_widget_item {
+	float: left;
+	display: inline;
+	width: 25%;
+}
+
+

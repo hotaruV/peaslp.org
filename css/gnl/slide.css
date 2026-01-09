@@ -1,0 +1,175 @@
+.slide {
+	position:relative;
+	overflow:hidden;
+}
+.slide.fijo {
+	height:470px;
+}
+
+.slide .flecha div {
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size:contain;
+	position:absolute;
+	top:50%;
+	margin-top:-25px;
+	height:40px;
+	width:40px;
+	z-index:2;
+	cursor:pointer;
+}
+.slide .flecha .izq {
+	background-image: url(../img/gnl/slide_izq.png);
+	left: 20px;
+}
+.slide .flecha .der {
+	background-image: url(../img/gnl/slide_der.png);
+	right: 20px;
+}
+.slide.fijo .items {
+	height:100%;
+}
+
+.slide .items {
+	position:relative;
+	z-index:1;
+}
+.slide .items .base{
+	position:relative;
+	z-index:-1;
+	opacity:0;
+}
+.slide .items .base img{
+	vertical-align:top;
+	width:100%;
+	height:auto;
+	object-fit: cover;
+}
+.slide .items .item {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: no-repeat center;
+	background-size: cover;
+	opacity: 0;
+	text-align: left;
+}
+.slide.slideLeft .items{
+	overflow:hidden;
+}
+.slide.slideLeft .items .anim {
+	position:absolute;
+	left:0;
+	top:0;
+	width:100%;
+	height:100%;	
+	box-sizing: border-box;
+	
+}
+.slide.slideLeft .items .item{
+	position:relative;
+	float: left;
+	display: inline;
+	top: inherit;
+	left: inherit;
+	width: 100%;
+	height: 100%;
+	opacity:1;
+}
+.slide .items .item .margen {
+	height:100%;	
+	padding: 0px 80px;
+}
+.slide .items .item .tabla{
+	padding:50px 0px 50px 0px;
+	box-sizing:border-box;
+}
+.slide.slideLeft .base{
+	
+}
+.slide .items .item:first-child {
+	opacity: 1;
+    z-index: 2;
+}
+
+.slide .items .item .bg{
+	position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+	background: no-repeat center;
+    background-size: cover;
+    z-index: -1;
+}
+
+@media (orientation: landscape){
+	.slide .items .item .bg.landscape, 
+	.slide .items .base img.landscape {
+	    display: block;
+	}
+	.slide .items .item .bg.portrait,
+	.slide .items .base img.portrait {
+        display: none;
+    }
+}
+@media (orientation: portrait){
+	.slide .items .item .bg.landscape, 
+	.slide .items .base img.landscape {
+	    display: none;
+	}
+	.slide .items .item .bg.portrait,
+	.slide .items .base img.portrait {
+        display: block
+    }
+}
+@media all and (max-width: 640px) {
+	.slide .flecha{
+		display: none;
+	}
+	.slide .items .item .margen {
+		padding:0px 10px;
+	}
+}
+
+
+.slide .items .item .mascara{
+	color:#FFF;
+	height:100%;
+	/* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#000000+0,000000+50,000000+100&0+1,0.5+70,1+100 */
+background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0) 1%, rgba(0,0,0,0.36) 50%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0) 1%,rgba(0,0,0,0.36) 50%,rgba(0,0,0,0.5) 70%,rgba(0,0,0,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0) 1%,rgba(0,0,0,0.36) 50%,rgba(0,0,0,0.5) 70%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+
+	position:relative;
+}
+
+.slide .puntos {
+	position:absolute;
+    left:0px;
+    bottom:10px;
+	width:100%;
+	text-align:center;
+	z-index:2;
+}
+
+.slide .puntos .punto {
+	width: 10px;
+	height: 10px;
+	margin: 10px;
+	background:#000000;
+	-webkit-border-radius: 100%;
+	-moz-border-radius: 100%;
+	border-radius: 100%;
+	float: left;
+	display: inline;
+	transition: all 0.5s ease;
+	cursor: pointer;
+}
+
+.slide .puntos .punto.activo {
+	background:#FFFFFF;
+}

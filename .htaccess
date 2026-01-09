@@ -1,0 +1,88 @@
+# =========================
+# Seguridad básica
+# =========================
+Options -Indexes
+IndexIgnore *
+
+# =========================
+# Compresión (mod_deflate)
+# =========================
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE text/xml
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE image/x-icon
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE application/rss+xml
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE application/xhtml+xml
+  AddOutputFilterByType DEFLATE application/x-font
+  AddOutputFilterByType DEFLATE application/x-font-truetype
+  AddOutputFilterByType DEFLATE application/x-font-ttf
+  AddOutputFilterByType DEFLATE application/x-font-otf
+  AddOutputFilterByType DEFLATE application/x-font-opentype
+  AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+  AddOutputFilterByType DEFLATE font/ttf
+  AddOutputFilterByType DEFLATE font/otf
+  AddOutputFilterByType DEFLATE font/opentype
+
+  # Navegadores antiguos
+  BrowserMatch ^Mozilla/4 gzip-only-text/html
+  BrowserMatch ^Mozilla/4\.0[678] no-gzip
+  BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+</IfModule>
+
+# =========================
+# Headers y caché
+# =========================
+<IfModule mod_headers.c>
+
+  # Cache para archivos estáticos (30 días)
+  <FilesMatch "\.(ico|pdf|jpg|jpeg|png|gif|swf|js|xml|json|css|svg|woff|eot|woff2|ttf)$">
+    Header set Cache-Control "max-age=2628000, public"
+  </FilesMatch>
+
+  # X-Frame-Options (neutral, CSP manda)
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # CSP para permitir iframe desde dominios autorizados
+  Header always set Content-Security-Policy "frame-ancestors 'self' https://wibik.com https://seseaslp.org https://plataformadigitalestatalslp.org http://peaslp.org https://peaslp.org http://peaslp.test https://peaslp.test"
+
+  # (Opcionales, por si luego los quieres activar)
+  # Header set X-XSS-Protection "1; mode=block"
+  # Header set X-Content-Type-Options "nosniff"
+  # Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
+  # Header set Referrer-Policy "same-origin"
+
+</IfModule>
+
+# =========================
+# Rewrites
+# =========================
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Forzar HTTPS (actívalo solo si ya tienes SSL)
+  # RewriteCond %{HTTPS} off
+  # RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # No tocar archivos ni carpetas reales
+  RewriteCond %{SCRIPT_FILENAME} !-d
+  RewriteCond %{SCRIPT_FILENAME} !-f
+
+  # Rutas
+  RewriteRule ^([a-z0-9_-]*)/$ index.php?lang=$1 [QSA]
+  RewriteRule ^([a-z0-9_-]*)$ index.php?menu=$1 [QSA]
+  RewriteRule ^([a-z]*)/([a-z0-9_-]*)$ index.php?lang=$1&menu=$2 [QSA]
+
+  RewriteRule ^([a-z0-9_-]*)/([0-9]*)/([a-z0-9_-]*)$ index.php?menu=$1&id=$2&slug=$3 [QSA]
+  RewriteRule ^([a-z]*)/([a-z0-9_-]*)/([0-9]*)/([a-z0-9_-]*)$ index.php?lang=$1&menu=$2&id=$3&slug=$4 [QSA]
+
+  RewriteRule ^([a-z0-9_-]*)/([0-9]*)/([a-z0-9_-]*)/([0-9]*)/([a-z0-9_-]*)$ index.php?menu=$1&id=$2&slug=$3&id2=$4&slug2=$5 [QSA]
+  RewriteRule ^([a-z]*)/([a-z0-9_-]*)/([0-9]*)/([a-z0-9_-]*)/([0-9]*)/([a-z0-9_-]*)$ index.php?lang=$1&menu=$2&id=$3&slug=$4&id2=$5&slug2=$6 [QSA]
+</IfModule>

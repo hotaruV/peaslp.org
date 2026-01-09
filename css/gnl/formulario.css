@@ -1,0 +1,285 @@
+
+
+
+.formulario{
+	
+}
+.formulario form{ 
+	margin:0; 
+	padding:0; 
+}
+.formulario .item{ 
+	padding:5px 0px; 
+	position:relative; 
+}
+
+.formulario .item.sin{ 
+	padding:0px 0px;
+}
+
+.formulario .item .p{ 
+	font-weight:700;
+}
+.formulario .item[data-obligatorio="true"] .p:after{
+  content:" *";
+  color:red;
+}
+
+.formulario .item .p.normal{ 
+	font-weight:normal;
+}
+
+.formulario .item .p.error{
+	color:#F00;
+}
+.formulario .item .r.sangria{
+	margin-left: 30px;
+	padding-top: 5px;
+}
+.formulario .item .r label{
+	cursor:pointer;
+	display:block;
+	position: relative;
+    padding-left: 30px;
+    /*min-height: 30px;*/
+    margin-top: 10px;
+	padding-bottom:5px;
+    
+}
+.formulario .item .r.sangria label{
+    margin-top: 0px;
+    
+}
+.formulario .item .r label input {
+    width: auto;
+    border: inherit;
+    padding: inherit;
+    margin: inherit;
+    height: inherit;
+    line-height: 1.456;
+    vertical-align: middle;
+    padding: 0px;
+    margin: 0px;
+	margin-left:5px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+	position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.formulario input{ 
+	width:100%; 
+	width:-moz-calc(100% - 12px); 
+	width:calc(100% - 12px); 
+	border:1px solid #cdcdcd; 
+	line-height:28px; 
+	height:28px; 
+	padding:0px 5px; 
+	font-size:1rem;
+	line-height: 40px;
+    height: 40px;
+	
+}
+.formulario select{ 
+	width:100%; 
+	width:-moz-calc(100% - 12px); 
+	width:calc(100% - 12px); 
+	line-height:30px; 
+	height:30px; 
+	font-weight:400; 
+	border: 1px solid #cdcdcd; 
+	padding:0px 5px; 
+	font-size:1rem;
+	box-sizing: inherit;
+	line-height: 40px;
+    height: 40px;
+}
+.formulario textarea{ 
+	width:100%; 
+	width:-moz-calc(100% - 12px); 
+	width:calc(100% - 12px); 
+	border:1px solid #cdcdcd; 
+	padding:9px 5px; 
+	resize:none; 
+	height:125px; 
+	min-height:125px;  
+	font-weight:400; 
+	font-size:1rem;
+	line-height: 1.4;
+    height: 40px;
+}
+.formulario textarea.auto{ 
+	/*
+	height:28px; 
+	min-height:48px;  
+	line-height:28px;
+	*/
+	min-height:22px;  
+}
+
+.formulario input:read-only, .formulario textarea:read-only{ 
+	background-color:#D9D9D9;
+	color:#000;
+}
+.formulario .extra{
+	padding-left:30px;	
+}
+
+.formulario input.auto {
+    width: auto;
+    border: inherit;
+    padding: inherit;
+    margin: inherit;
+    height: inherit;
+    line-height: 1.456;
+    vertical-align: middle;
+    margin-left: 5px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+.formulario .cuestionario {
+	text-align:left;	
+}
+.formulario .cuestionario div.input_encuesta {
+    padding-left: 20px;
+}
+
+.formulario input.oculto{ 
+	position:absolute; 
+	left:-99999px;
+}
+.formulario .input_add{ 
+	/*
+	background:url(../img/sitio/subir_archivo.png) no-repeat center; 
+	background-size:contain; 
+	position: relative; 
+	padding-bottom: 100%; 
+	cursor:pointer; 
+	*/
+}
+.formulario .archivos{
+	padding-left:15px;
+}
+.formulario .archivos .input_add{
+	margin-top:5px;
+	margin-bottom:5px;
+}
+.formulario .files{
+	
+}
+.formulario .files .archivo{
+	position:relative;
+	border-top:1px solid #CCC;
+}
+.formulario .files .archivo:first-child{
+	border-top:0px;
+}
+.formulario .archivo .nombre{
+	padding-right:75px;
+}
+.formulario .archivo .acciones{
+	position:absolute;
+	right:0;
+	top:0;
+	width:75px;
+	border-left:1px solid #CCC;
+	text-align:center;
+}
+.formulario .preguntas{
+	position:relative;	
+}
+.formulario .preguntas .acciones{
+	position:absolute;
+	right:0;
+	top:0;
+	width:125px;
+	border-left:1px solid #CCC;
+	text-align:right;
+}
+.formulario .matriz_radio{
+	padding-left:15px;	
+}
+.formulario .matriz_radio .matriz{
+	font-weight:700;
+	padding-top:5px;
+	
+}
+.formulario .matriz_radio .matriz .matriz{
+	padding-left:15px;
+	font-weight:400;
+	padding-top:0px;
+	padding-bottom:5px;
+}
+.formulario .estrellas{
+	padding-top:5px;
+	padding-bottom:15px;	
+}
+.formulario .estrellas.estrellas_min{
+	padding-top:0px;
+	padding-bottom:0px;	
+}
+.formulario .estrellas .estrella{ 
+	background:url(../img/sitio/estrella_g.png) no-repeat left center; 
+	background-size:contain;
+    background-size: 30px auto;
+	width:30px; 
+	height:30px; 
+	float:left; 
+	display:inline; 
+	margin-right:5px; 
+	cursor:pointer; 
+}
+.formulario .estrellas.estrellas_no .estrella{  
+	cursor:default;
+}
+.formulario .estrellas.estrellas_min .estrella{ 
+	width:15px; 
+	height:15px; 
+    background-size:15px auto;
+	margin-right:3px; 
+}
+.formulario .estrellas .e_activa{ 
+	background-image:url(../img/sitio/estrella.png); 
+}
+.formulario .estrellas .estrella .e_pct{ 
+	width:0%;
+	height:100%;
+	background:url(../img/sitio/estrella.png) no-repeat left center; 
+	background-size: 30px auto;
+}
+.formulario .estrellas.estrellas_min .estrella .e_pct{ 
+	background-size:15px auto;
+}
+
+.formulario .item .r .switcher{
+	position:relative;
+	padding-left:73px;
+	padding-top:8px;
+	cursor:pointer;
+	margin-bottom:1em;
+    display:inline-block;
+	width:auto;
+}
+.formulario .item .r .switcher .auto {
+	display:none;
+}
+.formulario .item .r .switcher .switch{
+	position:absolute;
+	left:0;
+	top:0;
+	width:68px;
+	height:42px;
+	background:url(../img/gnl/ico_switchOnOff.png) left center no-repeat;
+}
+.formulario .item .r .switcher .switch.on{
+	background-position:right center;
+}
+
+/*
+.estrellas .estrella_hover:hover{ 
+	background-image:url(../img/sitio/estrella_g.png); 
+}
+*/

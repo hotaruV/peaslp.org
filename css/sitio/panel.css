@@ -1,0 +1,144 @@
+.panel{
+	height:100vh;
+	overflow:hidden;
+}
+
+.panel .lateral{
+	position:absolute;
+	top:0;
+	height:100vh;
+	overflow-y:auto;
+	box-sizing:border-box;
+}
+
+.panel .lateral.izq{
+	left:0;
+	width:320px;
+}
+
+.panel .lateral.der{
+	right:0;
+	width:420px;
+	background-color:#EDEFF0;
+}
+
+.panel .lateral.izq .nombre{
+	background-color:#EDEFF0;	
+	padding: 1.5rem;
+	font-size:1rem;
+	font-weight: 700;
+}
+
+.panel .lateral.izq ul{
+	padding:0px;
+	margin:0px;
+}
+.panel .lateral.izq ul li{
+	list-style:none;
+	padding:0px;
+	margin:0px;
+}
+.panel .lateral.izq ul li a{
+	border-bottom: 1px solid #a9b1b7;
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.15;
+    padding: 1.5rem;
+	text-decoration:none;
+	position:relative;
+	
+    -o-transition: all .3s ease;
+    -ms-transition: all .3s ease;
+    -moz-transition: all .3s ease;
+    -webkit-transition: all .3s ease;
+    transition: all .3s ease;
+}
+.panel .lateral.izq ul li a.hijos{
+	padding-right:45px;
+}
+.panel .lateral.izq ul li a.hijos::after{
+	position:absolute;
+	right:15px;
+	top:0px;
+	height:100%;	
+	width:20px;
+	content: " ";
+	background:url(../img/sitio/chevron-down.16c97a3f.svg) no-repeat right center;
+}
+.panel .lateral.izq ul li a.activo{
+	background-color:#006eb5;	
+	color:#FFF;	
+}
+.panel .lateral.izq ul li a.hijos.activo::after{
+	-webkit-transform: rotateZ(-180deg);
+    -moz-transform: rotateZ(-180deg);
+    -ms-transform: rotateZ(-180deg);
+    -o-transform: rotateZ(-180deg);
+    transition: rotateZ(-180deg);
+	filter: brightness(0) invert(1);
+}
+
+.panel .lateral.izq ul li .acordion{
+	display:none;	
+}
+.panel .lateral.izq ul li .acordion li{
+
+}
+.panel .lateral.izq ul li .acordion li a{
+    font-size: 1rem;
+	padding: 1rem 1.5rem 1rem 2rem;
+    padding-left: 3rem;
+	font-weight:400;
+}
+
+.panel .plantilla{
+	height:100vh;
+	overflow-y:auto;
+	margin-left:320px;
+	margin-right:420px;
+	
+	border-left: 1px solid #a9b1b7;
+	border-right: 1px solid #a9b1b7;
+}
+
+.panel .plantilla .titulo{
+    border-bottom: 1px solid #a9b1b7;
+	padding-bottom: 5px;
+    margin-bottom: 5px;
+	box-sizing:border-box;
+}
+.panel .plantilla .titulo .orden{
+	display: inline-block;
+	padding: 5px;
+    margin: 5px;
+	box-sizing:border-box;
+	
+    border: 2px solid #006eb5;
+    background:#006eb5;
+	color:#FFF;
+	
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    
+    vertical-align: middle;
+	width:50px;
+	text-align:center;
+}
+.panel .plantilla .titulo .nombre{
+	display: inline-block;
+	padding: 5px;
+    margin: 5px;
+	box-sizing:border-box;
+	
+    font-weight: 700;
+    font-size: 1.25rem;
+    
+    vertical-align: middle;
+	
+    max-width: 100%;
+    max-width: -moz-calc(100% - 75px);
+    max-width: calc(100% - 75px);
+}
+    

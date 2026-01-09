@@ -1,0 +1,72 @@
+ul.token-input-list{
+	border:none;	
+}
+ul.token-input-list-facebook{
+	width:inherit;
+	font-size:1rem;	
+    color: var(--_dilum_m);
+    font-weight: 700;
+    padding: 0 5px !important;
+    border: 1px solid #cdcdcd;
+}
+li.token-input-token-facebook{
+    height: 30px  !important;
+    line-height: 30px !important;
+	margin: 3px !important;
+	font-family: ProximaNova,sans-serif;
+    font-size: 1rem;
+    line-height: 1.4;
+	font-weight:700;	
+	color: var(--_dilum_m);
+	padding:1px 5px !important;
+	padding-right: 20px !important;
+	float: left !important;
+	max-width:100%;
+	max-width: -moz-calc(100% - 31px);
+    max-width: calc(100% - 31px);
+    position: relative;
+	text-overflow: ellipsis;
+	border: 1px solid #ccd5e4 !important;
+}
+li.token-input-input-token-facebook{
+	line-height: 40px !important;
+}
+li.token-input-token-facebook span{
+	position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 20px;
+    text-align: center;
+}
+li.token-input-selected-token-facebook{
+	color:#FFF;	
+}
+ul.token-input-list-facebook li input{
+	margin:0px;
+	padding:0px 5px;	
+	line-height: 34px;
+    height: 34px;
+	
+}
+
+div.token-input-dropdown-facebook{
+	
+	border: 1px solid #cdcdcd;
+	border-top:none;
+	font-family: ProximaNova,sans-serif;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+div.token-input-dropdown-facebook ul li {
+	border-top:1px solid #cdcdcd;
+}
+div.token-input-dropdown-facebook ul li:first-child {
+	border-top:none;
+}
+div.token-input-dropdown-facebook p {
+    color:#4d5256;
+}
+div.token-input-dropdown-facebook ul li em {
+	color:#000;
+}
