@@ -15,3 +15,8 @@ files/PIPEA*.pdf
 **/f_*_evidencia_*
 
 files/lineas/**/*.png
+
+
+
+/vendor
+composer.lock

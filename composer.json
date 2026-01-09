@@ -1,0 +1,17 @@
+{
+    "name": "hotaruv/peaslp",
+    "description": "Sistema PI-PEA",
+    "authors": [
+        {
+            "name": "Carlos Valladares",
+            "email": "faotqm@hotmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "phpoffice/phpspreadsheet": "^5.3",
+        "phpmailer/phpmailer": "^7.0",
+        "nesbot/carbon": "^3.11",
+        "dompdf/dompdf": "^3.1"
+    }
+}

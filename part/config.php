@@ -1,8 +1,8 @@
 <?php
-$modo_sitio = 'local';
+$modo_sitio = 'pro';
 
-$urlName = "https://peaslp.test";
-$urlFolder = "/peaslp";
+$urlName = "peaslp.test";
+$urlFolder = "";
 $title_site = "Sistema de monitoreo, seguimiento y evaluación de cumplimiento del PI-PEA";
 
 $tokenSecurity = '754529344594fd820dcf0c1.24236467';
