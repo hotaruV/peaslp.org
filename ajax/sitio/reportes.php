@@ -1,5 +1,6 @@
 <?php
 define('APPLICATION', true);
+
 require_once "../../lib/class/Validar.php";
 require_once "../../lib/class/Util.php";
 require_once "../../lib/class/ConectarDB.php";
@@ -21,284 +22,397 @@ $usuarioDispositivoClass = new UsuarioDispositivo();
 $usuarioDispositivoAccesoClass = new UsuarioDispositivoAcceso();
 $usuarioIngresoClass = new UsuarioIngreso();
 
-require_once "../../part/gnl/login/verificar_login_ajax.php"; 
+require_once "../../part/gnl/login/verificar_login_ajax.php";
 require_once "../../part/gnl/login/verificar_login_ingreso.php";
 require_once "../../part/gnl/login/verificar_login_ajax_sesion.php";
 
 header('Cache-Control: no-cache, must-revalidate');
 header('Content-type: application/json');
+
 $arreglos = array();
 
-if(
-	isset($_POST) and
-	isset($_POST['token']) 
-){
-	
+if (isset($_POST) && isset($_POST['token'])) {
+
 	require_once "../../lib/model/TablaJSON.php";
 
 	$vars = array(
 		'idperiodo' => array("leyenda" => "Periodo", "tipo" => "entero", "nulo" => 0),
-		'tipo' => array("leyenda" => "Tipo", "tipo" => "texto", "nulo" => 0),
+		'tipo'      => array("leyenda" => "Tipo", "tipo" => "texto", "nulo" => 0), // lineas|indicadores
 	);
-	
+
 	$error_post = 0;
 	$reportes_post = array();
-	foreach($vars as $key => $var){ 
-		if(isset($_POST[$key])){ $reportes_post[$key] = $_POST[$key]; }
-		else { $error_post = 1; }
+	foreach ($vars as $key => $var) {
+		if (isset($_POST[$key])) {
+			$reportes_post[$key] = $_POST[$key];
+		} else {
+			$error_post = 1;
+		}
 	}
-	
+
 	if ($error_post == 0) {
+
 		$reportes_data = array();
 		$error = array();
-		foreach($vars as $key => $var){ 
+
+		foreach ($vars as $key => $var) {
 			$ok = false;
 			$info = '';
-			if(isset($reportes_post[$key])){ 
+
+			if (isset($reportes_post[$key])) {
 				$validacion = validarData($reportes_post[$key], $var);
-				if($validacion["ok"]){ 
-					$ok = true; 
+				if ($validacion["ok"]) {
+					$ok = true;
 					$reportes_data[$key] = $validacion["valor"];
-				} else { $info = $validacion["info"]; }
-			} else { $info = 'No se recibió el dato.'; }
-			if(!$ok){ $error[$key] = $info; }
+				} else {
+					$info = $validacion["info"];
+				}
+			} else {
+				$info = 'No se recibió el dato.';
+			}
+
+			if (!$ok) {
+				$error[$key] = $info;
+			}
 		}
-		if(empty($error)){
-			
+
+		if (empty($error)) {
+
 			$metas_al_global = array();
-			
-			$periodoClass = new TablaJSON("periodo");
-			$actorClass = new TablaJSON("actor");
-			$capturaClass = new TablaJSON("captura");
+
+			$periodoClass  = new TablaJSON("periodo");
+			$actorClass    = new TablaJSON("actor");
+			$capturaClass  = new TablaJSON("captura");
 			$revisionClass = new TablaJSON("revision");
-			$indicadorClass = new TablaJSON("indicador");
-			$lineaClass = new TablaJSON("linea");
 			$elementoClass = new TablaJSON("elemento");
-			
+
 			$tipo = NULL;
-			if($reportes_data["tipo"] == "lineas"){
+			if ($reportes_data["tipo"] == "lineas") {
 				$tipo = 'linea';
-			} else if($reportes_data["tipo"] == "indicadores"){
+			} else if ($reportes_data["tipo"] == "indicadores") {
+				// si en tu BD este valor es distinto, cámbialo aquí
 				$tipo = 'captura';
 			}
-			
-			$periodo = $periodoClass->getTablaJSONID($reportes_data["idperiodo"]);
-			if(is_array($periodo) and !empty($periodo)){ 
-				$periodo["idperiodo"];
+
+			$idperiodo = (int)$reportes_data["idperiodo"];
+
+			$periodo = $periodoClass->getTablaJSONID($idperiodo);
+			if (is_array($periodo) && !empty($periodo)) {
+
 				$periodo["periodo_data"] = json_decode($periodo["periodo_data"], true);
-				
+
 				$municipios = json_decode($actorClass->municipios, true);
-				
-				$actores = $actorClass->getTablaJSONs(" AND activo = 1 ", " CAST(JSON_UNQUOTE(JSON_EXTRACT(actor_data, '$.actor')) AS CHAR) ASC ");
-				foreach($actores as $keyActor => $actor){
+				if (!is_array($municipios)) {
+					$municipios = array();
+				}
+
+				// =========================
+				// FIX: Index municipios por id (evita foreach gigante y errores raros)
+				// =========================
+				$municipiosIndex = array();
+				foreach ($municipios as $m) {
+					if (!isset($m['id'])) continue;
+					$municipiosIndex[(string)$m['id']] = isset($m['municipio']) ? $m['municipio'] : null;
+				}
+
+				// Actores activos
+				$actores = $actorClass->getTablaJSONs(
+					" AND activo = 1 ",
+					" CAST(JSON_UNQUOTE(JSON_EXTRACT(actor_data, '$.actor')) AS CHAR) ASC "
+				);
+
+				// =========================
+				// Helpers null seguro (JSON null vs "null")
+				// =========================
+				if (!function_exists('_normNull')) {
+					function _normNull($v)
+					{
+						if ($v === null) return 'null';
+						$s = is_string($v) ? trim($v) : trim((string)$v);
+						if ($s === '' || strtolower($s) === 'null') return 'null';
+						return $s;
+					}
+				}
+
+				if (!function_exists('_makeKey')) {
+					function _makeKey($actor, $muni, $cat, $ele)
+					{
+						$muniKey = _normNull($muni); // 'null' o id
+						$catKey  = (_normNull($cat) === 'null') ? '' : _normNull($cat);
+						$eleKey  = (_normNull($ele) === 'null') ? '' : _normNull($ele);
+						return (string)$actor . '|' . $muniKey . '|' . $catKey . '|' . $eleKey;
+					}
+				}
+
+				// =========================
+				// NUEVO: contar estados dentro del JSON "lineas"
+				// - Para 'linea' y para 'captura' funciona igual (si trae lineas).
+				// - Si no trae lineas, queda en 0 sin reventar.
+				// =========================
+				if (!function_exists('_countEstadosLineas')) {
+					function _countEstadosLineas($capturaDataDecoded)
+					{
+						$out = array(
+							'total_lineas' => 0,
+							'cumplidas' => 0,
+							'no_cumplidas' => 0,
+							'sin_estado' => 0,
+						);
+
+						if (!is_array($capturaDataDecoded)) return $out;
+						if (!isset($capturaDataDecoded['lineas']) || !is_array($capturaDataDecoded['lineas'])) return $out;
+
+						foreach ($capturaDataDecoded['lineas'] as $lineaObj) {
+							$out['total_lineas']++;
+
+							$estado = null;
+							if (isset($lineaObj['cumplio']['v'][0])) $estado = (string)$lineaObj['cumplio']['v'][0];
+
+							if ($estado === '1') $out['cumplidas']++;
+							else if ($estado === '2') $out['no_cumplidas']++;
+							else $out['sin_estado']++;
+						}
+
+						return $out;
+					}
+				}
+
+				// =========================
+				// Batch: capturas del periodo/tipo
+				// =========================
+				$capturasRows = $capturaClass->getTablaJSONs("
+                    AND activo = 1
+                    AND captura = '" . $tipo . "'
+                    AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.periodo')) = " . $idperiodo . "
+                ", " fecha DESC ");
+
+				$capturasIndex = array();
+				$capturasStats = array(); // key => counts
+
+				foreach ($capturasRows as $row) {
+					$d = json_decode($row['captura_data'], true);
+					if (!is_array($d)) {
+						continue;
+					}
+
+					$a = isset($d['actor']) ? (string)$d['actor'] : '';
+					if ($a === '') {
+						continue;
+					}
+
+					$muni = $d['actor_municipio'] ?? null; // puede ser null real
+					$cat  = $d['actor_catalogo'] ?? null;
+					$ele  = $d['actor_elemento'] ?? null;
+
+					$key = _makeKey($a, $muni, $cat, $ele);
+
+					// más reciente por combinación
+					if (!isset($capturasIndex[$key])) {
+						$row['captura_data'] = $d; // decodificado
+						$capturasIndex[$key] = $row;
+						$capturasStats[$key] = _countEstadosLineas($d);
+					}
+				}
+
+				// =========================
+				// Batch: revisiones del periodo/tipo
+				// =========================
+				$revisionesRows = $revisionClass->getTablaJSONs("
+                    AND activo = 1
+                    AND revision = '" . $tipo . "'
+                    AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.periodo')) = " . $idperiodo . "
+                ", " fecha DESC ");
+
+				$revisionesIndex = array();
+				foreach ($revisionesRows as $row) {
+					$d = json_decode($row['revision_data'], true);
+					if (!is_array($d)) {
+						continue;
+					}
+
+					$a = isset($d['actor']) ? (string)$d['actor'] : '';
+					if ($a === '') {
+						continue;
+					}
+
+					$muni = $d['actor_municipio'] ?? null;
+					$cat  = $d['actor_catalogo'] ?? null;
+					$ele  = $d['actor_elemento'] ?? null;
+
+					$key = _makeKey($a, $muni, $cat, $ele);
+
+					if (!isset($revisionesIndex[$key])) {
+						$row['revision_data'] = $d;
+						$revisionesIndex[$key] = $row;
+					}
+				}
+
+				// =========================
+				// Armar estructura por actor (MISMA salida que tu original)
+				// + FIX: agrega totales planos para DataTable:
+				//   total_lineas, cumplidas, no_cumplidas, sin_estado
+				// =========================
+				foreach ($actores as $keyActor => $actor) {
+
 					$actores[$keyActor]['actor_data'] = json_decode($actores[$keyActor]['actor_data'], true);
 					$data = $actores[$keyActor]['actor_data'];
-					$municipio = false;
-					$catalogos = false;
-					if(isset($data["municipios"]) and isset($data["municipios"]["v"]) and count($data["municipios"]["v"]) > 0 and $data["municipios"]["v"][0] == 1){
-						$municipio = true;
+
+					$municipioFlag = false;
+					$catalogosFlag = false;
+
+					if (isset($data["municipios"]["v"][0]) && (int)$data["municipios"]["v"][0] === 1) {
+						$municipioFlag = true;
 					}
-					if(isset($data["catalogos"]) and isset($data["catalogos"]["v"]) and count($data["catalogos"]["v"]) > 0 and $data["catalogos"]["v"][0] == 1){
-						$catalogos = true;
+					if (isset($data["catalogos"]["v"][0]) && (int)$data["catalogos"]["v"][0] === 1) {
+						$catalogosFlag = true;
 					}
-					$actores[$keyActor]["municipios"] = $municipio;
-					$actores[$keyActor]["catalogos"] = $catalogos;
-					
-					
-					if($municipio){
+
+					$actores[$keyActor]["municipios"] = $municipioFlag;
+					$actores[$keyActor]["catalogos"] = $catalogosFlag;
+
+					// FIX: inicializa totales SIEMPRE (para que no queden "--")
+					$actores[$keyActor]["total_lineas"] = 0;
+					$actores[$keyActor]["cumplidas"] = 0;
+					$actores[$keyActor]["no_cumplidas"] = 0;
+					$actores[$keyActor]["sin_estado"] = 0;
+
+					$idactor = (string)$actor['idactor'];
+
+					if ($municipioFlag) {
+
 						$actores[$keyActor]['captura'] = array();
 						$actores[$keyActor]['revision'] = array();
-						
-						foreach($municipios as $llave => $item){
-							/* captura */
-							$captura = $capturaClass->getTablaJSONUnique(
-								" 
-									AND captura = '".$tipo."'
-									AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.actor')) = ".$actor['idactor']."
-									AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.actor_municipio')) = \"".$item["id"]."\" 
-									AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.periodo')) = ".$reportes_data["idperiodo"]."
-									AND activo = 1 
-								"
-							);	
-							if(is_array($captura) and !empty($captura)){ 
-								
-								$captura['captura_data'] = json_decode($captura['captura_data'], true);
-								$actores[$keyActor]['captura'][$item["id"]] = array(
-									"municipio" => $item["municipio"],
-									"captura" => $captura
+
+						foreach ($municipiosIndex as $mid => $muniNombre) {
+							$key = _makeKey($idactor, $mid, null, null);
+
+							if (isset($capturasIndex[$key])) {
+								$actores[$keyActor]['captura'][$mid] = array(
+									"municipio" => $muniNombre,
+									"captura" => $capturasIndex[$key]
 								);
+
+								// Suma totales de esa combinación (YA filtrada a la más reciente)
+								if (isset($capturasStats[$key])) {
+									$actores[$keyActor]["total_lineas"] += (int)$capturasStats[$key]['total_lineas'];
+									$actores[$keyActor]["cumplidas"]    += (int)$capturasStats[$key]['cumplidas'];
+									$actores[$keyActor]["no_cumplidas"] += (int)$capturasStats[$key]['no_cumplidas'];
+									$actores[$keyActor]["sin_estado"]   += (int)$capturasStats[$key]['sin_estado'];
+								}
 							}
-							
-							/* revision */
-							$revision = $revisionClass->getTablaJSONUnique(
-								" 
-									AND revision = '".$tipo."'
-									AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.actor')) = ".$actor['idactor']."
-									AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.actor_municipio')) = \"".$item["id"]."\" 
-									AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.periodo')) = ".$reportes_data["idperiodo"]."
-									AND activo = 1 
-								"
-							);
-							if(is_array($revision) and !empty($revision)){ 
-								$revision['revision_data'] = json_decode($revision['revision_data'], true);
-								$actores[$keyActor]['revision'][$item["id"]] = array(
-									"municipio" => $item["municipio"],
-									"revision" => $revision
+
+							if (isset($revisionesIndex[$key])) {
+								$actores[$keyActor]['revision'][$mid] = array(
+									"municipio" => $muniNombre,
+									"revision" => $revisionesIndex[$key]
 								);
 							}
 						}
-					} else if($catalogos){
-						
+					} else if ($catalogosFlag) {
+
 						$actores[$keyActor]['captura'] = array();
 						$actores[$keyActor]['revision'] = array();
-						
+
+						$catalogoPertenece = $data["catalogo_pertenece"];
+
 						$elementos = $elementoClass->getTablaJSONs(" 
-							AND activo = 1 
-							AND JSON_UNQUOTE(JSON_EXTRACT(elemento_data, '$.catalogo')) = ".$data["catalogo_pertenece"]."
-						", " CAST(JSON_UNQUOTE(JSON_EXTRACT(elemento_data, '$.elemento')) AS CHAR) ASC ");
-						
-						foreach($elementos as $llave => $item){
-							
+                            AND activo = 1 
+                            AND JSON_UNQUOTE(JSON_EXTRACT(elemento_data, '$.catalogo')) = " . $catalogoPertenece . "
+                        ", " CAST(JSON_UNQUOTE(JSON_EXTRACT(elemento_data, '$.elemento')) AS CHAR) ASC ");
+
+						foreach ($elementos as $item) {
 							$item['elemento_data'] = json_decode($item['elemento_data'], true);
-							/* captura */
-							$captura = $capturaClass->getTablaJSONUnique(
-								" 
-									AND captura = '".$tipo."'
-									AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.actor')) = ".$actor['idactor']."
-									AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.actor_municipio')) = \"null\" 
-									AND (
-										JSON_EXTRACT(captura_data, '$.actor_catalogo') IS NOT NULL 
-										AND JSON_EXTRACT(captura_data, '$.actor_elemento') IS NOT NULL
-										AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.actor_catalogo')) = \"".$data["catalogo_pertenece"]."\"
-										AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.actor_elemento')) = \"".$item["idelemento"]."\"
-									)
-									AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.periodo')) = ".$reportes_data["idperiodo"]."
-									AND activo = 1 
-								"
-							);	
-							//if(is_array($captura) and !empty($captura)){ 
-								if(is_array($captura) and !empty($captura)){ 
-									$captura['captura_data'] = json_decode($captura['captura_data'], true);
-								}
-								$actores[$keyActor]['captura'][$item["idelemento"]] = array(
-									"idcatalogo" => $data["catalogo_pertenece"],
-									"idelemento" => $item["idelemento"],
-									"elemento" => $item['elemento_data']["elemento"],
-									"captura" => (is_array($captura) and !empty($captura))?$captura:NULL
-								);
-							//}
-							
-							/* revision */
-							$revision = $revisionClass->getTablaJSONUnique(
-								" 
-									AND revision = '".$tipo."'
-									AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.actor')) = ".$actor['idactor']."
-									AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.actor_municipio')) = \"null\" 
-									AND (
-										JSON_EXTRACT(revision_data, '$.actor_catalogo') IS NOT NULL 
-										AND JSON_EXTRACT(revision_data, '$.actor_elemento') IS NOT NULL
-										AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.actor_catalogo')) = \"".$data["catalogo_pertenece"]."\"
-										AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.actor_elemento')) = \"".$item["idelemento"]."\"
-									)
-									AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.periodo')) = ".$reportes_data["idperiodo"]."
-									AND activo = 1 
-								"
+
+							$idelemento = (string)$item["idelemento"];
+							$nombreElemento = $item['elemento_data']["elemento"];
+
+							// CLAVE: municipio = null, pero catalogo/elemento con valor
+							$key = _makeKey($idactor, null, $catalogoPertenece, $idelemento);
+
+							$actores[$keyActor]['captura'][$idelemento] = array(
+								"idcatalogo" => $catalogoPertenece,
+								"idelemento" => $idelemento,
+								"elemento" => $nombreElemento,
+								"captura" => isset($capturasIndex[$key]) ? $capturasIndex[$key] : NULL
 							);
-							//if(is_array($revision) and !empty($revision)){ 
-								if(is_array($revision) and !empty($revision)){ 
-									$revision['revision_data'] = json_decode($revision['revision_data'], true);
-								}
-								$actores[$keyActor]['revision'][$item["idelemento"]] = array(
-									"idcatalogo" => $data["catalogo_pertenece"],
-									"idelemento" => $item["idelemento"],
-									"elemento" => $item['elemento_data']["elemento"],
-									"revision" => (is_array($revision) and !empty($revision))?$revision:NULL
-								);
-							//}
+
+							$actores[$keyActor]['revision'][$idelemento] = array(
+								"idcatalogo" => $catalogoPertenece,
+								"idelemento" => $idelemento,
+								"elemento" => $nombreElemento,
+								"revision" => isset($revisionesIndex[$key]) ? $revisionesIndex[$key] : NULL
+							);
+
+							// Suma totales (si hay captura real)
+							if (isset($capturasStats[$key])) {
+								$actores[$keyActor]["total_lineas"] += (int)$capturasStats[$key]['total_lineas'];
+								$actores[$keyActor]["cumplidas"]    += (int)$capturasStats[$key]['cumplidas'];
+								$actores[$keyActor]["no_cumplidas"] += (int)$capturasStats[$key]['no_cumplidas'];
+								$actores[$keyActor]["sin_estado"]   += (int)$capturasStats[$key]['sin_estado'];
+							}
 						}
-						
-					} else { 
-						/*
-						$actores[$keyActor]['captura'] = NULL;
-						$actores[$keyActor]['revision'] = NULL;
-						*/
-						/* captura */
-						$captura = $capturaClass->getTablaJSONUnique(
-							" 
-								AND captura = '".$tipo."'
-								AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.actor')) = ".$actor['idactor']."
-								AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.actor_municipio')) = \"null\" 
-								AND JSON_UNQUOTE(JSON_EXTRACT(captura_data, '$.periodo')) = ".$reportes_data["idperiodo"]."
-								AND activo = 1 
-							"
-						);
-						if(is_array($captura) and !empty($captura)){ 
-							$captura['captura_data'] = json_decode($captura['captura_data'], true);
-							$actores[$keyActor]['captura'] = $captura;
+					} else {
+
+						// NORMAL real: municipio null, catalogo null, elemento null
+						$key = _makeKey($idactor, null, null, null);
+
+						if (isset($capturasIndex[$key])) {
+							$actores[$keyActor]['captura'] = $capturasIndex[$key];
+
+							if (isset($capturasStats[$key])) {
+								$actores[$keyActor]["total_lineas"] = (int)$capturasStats[$key]['total_lineas'];
+								$actores[$keyActor]["cumplidas"]    = (int)$capturasStats[$key]['cumplidas'];
+								$actores[$keyActor]["no_cumplidas"] = (int)$capturasStats[$key]['no_cumplidas'];
+								$actores[$keyActor]["sin_estado"]   = (int)$capturasStats[$key]['sin_estado'];
+							}
 						}
-						
-						/* revision */
-						$revision = $revisionClass->getTablaJSONUnique(
-							" 
-								AND revision = '".$tipo."'
-								AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.actor')) = ".$actor['idactor']."
-								AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.actor_municipio')) = \"null\" 
-								AND JSON_UNQUOTE(JSON_EXTRACT(revision_data, '$.periodo')) = ".$reportes_data["idperiodo"]."
-								AND activo = 1 
-							"
-						);
-						if(is_array($revision) and !empty($revision)){ 
-							$revision['revision_data'] = json_decode($revision['revision_data'], true);
-							$actores[$keyActor]['revision'] = $revision;
+						if (isset($revisionesIndex[$key])) {
+							$actores[$keyActor]['revision'] = $revisionesIndex[$key];
 						}
-						
 					}
-					
+
+					// Tu función original (intacta)
 					$respuesta = lineas_indicadores_actor($actor['idactor']);
-					
+
 					$actores[$keyActor]['lineas'] = $respuesta["lineas"];
 					$actores[$keyActor]['indicadores'] = $respuesta["indicadores"];
-					
-					foreach($respuesta["metas_al_arr"] as $llave3 => $meta){
-						if(!isset($metas_al_global[$llave3])){
+
+					foreach ($respuesta["metas_al_arr"] as $llave3 => $meta) {
+						if (!isset($metas_al_global[$llave3])) {
 							$metas_al_global[$llave3] = $meta;
-						}	
+						}
 					}
-					
-					unset($arreglos['encontro']);
-					
-					unset($arreglos['lineas']);
-					unset($arreglos['ejes']);
-					unset($arreglos['plazos']);
-					
-					unset($arreglos['indicadores']);
-					unset($arreglos['metas_al']);
-					unset($arreglos['arbol']);
-					
 				}
+
 				$arreglos["actores"] = $actores;
 				$arreglos["metas_al"] = $metas_al_global;
-				
 			}
-			$arreglos['ok'] = 1; 
+
+			$arreglos['ok'] = 1;
 		} else {
-			$arreglos['ok'] = -7; 
-			$arreglos['error'] = $error; 
-		}	
-	} else { $arreglos['ok'] = -3; $arreglos['paso'] = 1; }
-} else { $arreglos['ok'] = -3; $arreglos['paso'] = 2; }
+			$arreglos['ok'] = -7;
+			$arreglos['error'] = $error;
+		}
+	} else {
+		$arreglos['ok'] = -3;
+		$arreglos['paso'] = 1;
+	}
+} else {
+	$arreglos['ok'] = -3;
+	$arreglos['paso'] = 2;
+}
+
 $arreglos = utf8_converter($arreglos);
 echo json_encode($arreglos);
 
-function lineas_indicadores_actor($idactor){
+function lineas_indicadores_actor($idactor)
+{
 	$arreglos = array();
-	
 	require "part_preguntas.php";
-	
+
 	return array(
 		'lineas' => $lineas,
 		'indicadores' => $indicadores,
 		'metas_al_arr' => $metas_al_arr,
 	);
 }
-?>
